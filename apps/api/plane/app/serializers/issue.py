@@ -13,6 +13,7 @@ from rest_framework import serializers
 
 # Module imports
 from .base import BaseSerializer, DynamicBaseSerializer
+from .msws import MSWSTranslationsMixin
 from .user import UserLiteSerializer
 from .state import StateLiteSerializer
 from .project import ProjectLiteSerializer
@@ -695,23 +696,14 @@ class IssueVoteSerializer(BaseSerializer):
         read_only_fields = fields
 
 
-class IssueCommentSerializer(BaseSerializer):
+class IssueCommentSerializer(MSWSTranslationsMixin, BaseSerializer):
     actor_detail = UserLiteSerializer(read_only=True, source="actor")
     issue_detail = IssueFlatSerializer(read_only=True, source="issue")
     project_detail = ProjectLiteSerializer(read_only=True, source="project")
     workspace_detail = WorkspaceLiteSerializer(read_only=True, source="workspace")
     comment_reactions = CommentReactionSerializer(read_only=True, many=True)
     is_member = serializers.BooleanField(read_only=True)
-    translations = serializers.SerializerMethodField()
-
-    def get_translations(self, obj):
-        return list(
-            Translation.objects.filter(
-                content_type=Translation.ContentType.COMMENT,
-                content_id=obj.id,
-                status__in=[Translation.Status.COMPLETED, Translation.Status.SKIPPED],
-            ).values("field", "source_language", "target_language", "translated_text", "status")
-        )
+    translation_content_type = Translation.ContentType.COMMENT
 
     class Meta:
         model = IssueComment
@@ -942,20 +934,11 @@ class IssueLiteSerializer(DynamicBaseSerializer):
         read_only_fields = fields
 
 
-class IssueDetailSerializer(IssueSerializer):
+class IssueDetailSerializer(MSWSTranslationsMixin, IssueSerializer):
     description_html = serializers.CharField()
     is_subscribed = serializers.BooleanField(read_only=True)
     is_intake = serializers.BooleanField(read_only=True)
-    translations = serializers.SerializerMethodField()
-
-    def get_translations(self, obj):
-        return list(
-            Translation.objects.filter(
-                content_type=Translation.ContentType.ISSUE,
-                content_id=obj.id,
-                status__in=[Translation.Status.COMPLETED, Translation.Status.SKIPPED],
-            ).values("field", "source_language", "target_language", "translated_text", "status")
-        )
+    translation_content_type = Translation.ContentType.ISSUE
 
     class Meta(IssueSerializer.Meta):
         fields = IssueSerializer.Meta.fields + [

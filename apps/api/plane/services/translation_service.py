@@ -22,7 +22,7 @@ class TranslationService:
         # Import here so local development remains usable before a key is configured.
         from openai import OpenAI
 
-        response = OpenAI(api_key=api_key).chat.completions.create(
+        response = OpenAI(api_key=api_key, timeout=30, max_retries=0).chat.completions.create(
             model=os.environ.get("MSWS_TRANSLATION_MODEL", "gpt-4o-mini"),
             temperature=0,
             messages=[

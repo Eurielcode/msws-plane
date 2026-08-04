@@ -129,3 +129,21 @@ class TestTranslateContentTask:
         assert translation.status == Translation.Status.COMPLETED
         assert translation.translated_text == "金曜日までに確認してください"
         assert translation.original_text == "Please review the deployment plan before Friday"
+
+    def test_translated_output_is_sanitized_before_being_stored(self):
+        """Defense in depth: a translation response is treated as untrusted HTML,
+        same as user-authored comment/description content, before it is persisted
+        and rendered read-only in the UI."""
+        translation = self._make_translation(target_language="ja")
+
+        with patch(
+            "plane.services.translation_service.translation_service.translate",
+            return_value="<p>Hello</p><script>alert(1)</script><img src=x onerror=alert(1)>",
+        ):
+            translate_content.apply(args=[str(translation.id)])
+
+        translation.refresh_from_db()
+        assert translation.status == Translation.Status.COMPLETED
+        assert "<script" not in translation.translated_text
+        assert "onerror" not in translation.translated_text
+        assert "<p>Hello</p>" in translation.translated_text

@@ -11,6 +11,8 @@ validation (shared-view iframe only, no OAuth, no event writes).
 from datetime import date, timedelta
 
 import pytest
+from django.test.utils import CaptureQueriesContext
+from django.db import connection
 from django.urls import reverse
 from rest_framework import status
 
@@ -60,6 +62,24 @@ class TestManagerDashboardEndpoint:
         assert employee["assigned"] == 2
         assert employee["completed"] == 1
         assert employee["progress"] == 50
+
+    def test_employee_stats_use_a_constant_number_of_queries(self, session_client, workspace, create_user):
+        """Regression test: the per-employee aggregation used to run two
+        COUNT queries per employee in a Python loop. It must not scale with
+        the number of employees."""
+        project = ProjectFactory(workspace=workspace, created_by=create_user)
+        ProjectMemberFactory(project=project, member=create_user, workspace=workspace, role=20)
+        url = reverse("manager-dashboard", kwargs={"slug": workspace.slug})
+
+        for i in range(8):
+            member = UserFactory(username=f"msws-perf-employee-{i}")
+            WorkspaceMember.objects.create(workspace=workspace, member=member, role=15, is_active=True)
+
+        with CaptureQueriesContext(connection) as ctx:
+            response = session_client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["employees"]) == 9  # create_user + 8 more
+        assert len(ctx.captured_queries) < 15
 
     def test_patch_accepts_a_google_calendar_embed_url(self, session_client, workspace):
         url = reverse("manager-dashboard", kwargs={"slug": workspace.slug})
