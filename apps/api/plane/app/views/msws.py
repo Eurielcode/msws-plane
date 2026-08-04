@@ -47,8 +47,14 @@ class ManagerDashboardEndpoint(BaseAPIView):
     def patch(self, request, slug):
         workspace = Workspace.objects.get(slug=slug)
         url = request.data.get("google_calendar_embed_url", "")
-        if url and not (url.startswith("https://calendar.google.com/") or url.startswith("https://www.google.com/calendar/")):
-            return Response({"google_calendar_embed_url": "A Google Calendar embed URL is required."}, status=status.HTTP_400_BAD_REQUEST)
+        is_google_calendar_url = url.startswith("https://calendar.google.com/") or url.startswith(
+            "https://www.google.com/calendar/"
+        )
+        if url and not is_google_calendar_url:
+            return Response(
+                {"google_calendar_embed_url": "A Google Calendar embed URL is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         settings, _ = WorkspaceSchedulerSettings.objects.get_or_create(workspace=workspace)
         settings.google_calendar_embed_url = url
         settings.save(update_fields=["google_calendar_embed_url", "updated_at"])
