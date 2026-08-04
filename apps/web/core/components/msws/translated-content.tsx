@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { Languages } from "lucide-react";
+import { useTranslation } from "@plane/i18n";
 import { LiteTextEditor } from "@/components/editor/lite-text";
 
 type Translation = {
@@ -16,8 +17,14 @@ type Props = {
   projectId?: string;
 };
 
+function useReaderTargetLanguage(): string {
+  const { currentLocale } = useTranslation();
+  return currentLocale?.toLowerCase().startsWith("ja") ? "ja" : "en";
+}
+
 export function TranslatedContent({ translations, field, workspaceId, workspaceSlug, projectId }: Props) {
-  const targetLanguage = typeof navigator !== "undefined" && navigator.language.toLowerCase().startsWith("ja") ? "ja" : "en";
+  const { t } = useTranslation();
+  const targetLanguage = useReaderTargetLanguage();
   const translation = useMemo(
     () => translations?.find((item) => item.field === field && item.target_language === targetLanguage),
     [field, targetLanguage, translations]
@@ -27,7 +34,7 @@ export function TranslatedContent({ translations, field, workspaceId, workspaceS
   return (
     <div className="mt-3 border-t border-subtle pt-3">
       <div className="mb-1 flex items-center gap-1.5 text-body-xs-medium text-secondary">
-        <Languages className="size-3.5" /> Translated automatically
+        <Languages className="size-3.5" /> {t("msws_translated_automatically")}
       </div>
       <LiteTextEditor
         editable={false}
@@ -45,7 +52,7 @@ export function TranslatedContent({ translations, field, workspaceId, workspaceS
 }
 
 export function TranslatedText({ translations, field }: Pick<Props, "translations" | "field">) {
-  const targetLanguage = typeof navigator !== "undefined" && navigator.language.toLowerCase().startsWith("ja") ? "ja" : "en";
+  const targetLanguage = useReaderTargetLanguage();
   const translation = useMemo(
     () => translations?.find((item) => item.field === field && item.target_language === targetLanguage),
     [field, targetLanguage, translations]

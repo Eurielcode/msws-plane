@@ -50,7 +50,7 @@ export const SidebarWorkspaceMenu = observer(function SidebarWorkspaceMenu() {
     },
     {
       key: "manager",
-      labelTranslationKey: "Manager dashboard",
+      labelTranslationKey: "sidebar.manager_dashboard",
       href: `/${workspaceSlug}/manager/`,
       access: [EUserWorkspaceRoles.ADMIN],
       Icon: LayoutDashboard,
