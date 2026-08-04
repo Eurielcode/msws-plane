@@ -12,7 +12,7 @@ from .base import BaseAPIView
 class ManagerDashboardEndpoint(BaseAPIView):
     """Read and update the small manager-facing MSWS dashboard payload."""
 
-    @allow_permission([ROLE.ADMIN])
+    @allow_permission([ROLE.ADMIN], level="WORKSPACE")
     def get(self, request, slug):
         workspace = Workspace.objects.get(slug=slug)
         today = date.today()
@@ -43,7 +43,7 @@ class ManagerDashboardEndpoint(BaseAPIView):
             "google_calendar_embed_url": settings.google_calendar_embed_url,
         })
 
-    @allow_permission([ROLE.ADMIN])
+    @allow_permission([ROLE.ADMIN], level="WORKSPACE")
     def patch(self, request, slug):
         workspace = Workspace.objects.get(slug=slug)
         url = request.data.get("google_calendar_embed_url", "")

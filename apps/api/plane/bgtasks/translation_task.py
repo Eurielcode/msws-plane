@@ -4,7 +4,7 @@ from plane.db.models import Translation
 from plane.services.translation_service import translation_service
 
 
-@shared_task(bind=True, max_retries=2, default_retry_delay=30)
+@shared_task(bind=True, max_retries=3, retry_backoff=30, retry_backoff_max=300, retry_jitter=True)
 def translate_content(self, translation_id: str):
     translation = Translation.objects.get(pk=translation_id)
     translation.status = Translation.Status.PENDING
