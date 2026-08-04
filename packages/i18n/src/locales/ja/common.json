@@ -12,7 +12,7 @@
   "msws_completed": "完了",
   "msws_overdue": "期限超過",
   "msws_employee_progress": "メンバーの進捗",
-  "msws_employee_summary": "割り当て {{assigned}} 件 ・ 完了 {{completed}} 件",
+  "msws_employee_summary": "割り当て {assigned} 件 ・ 完了 {completed} 件",
   "msws_shared_google_calendar": "共有Googleカレンダー",
   "msws_calendar_url_placeholder": "Googleカレンダーの埋め込みURLを貼り付け",
   "msws_save_calendar": "カレンダーを保存",
