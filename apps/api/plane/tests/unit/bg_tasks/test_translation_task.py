@@ -111,7 +111,7 @@ class TestTranslateContentTask:
 
         translation.refresh_from_db()
         assert translation.status == Translation.Status.FAILED
-        assert "OPENAI_API_KEY" in translation.error_message
+        assert "ANTHROPIC_API_KEY" in translation.error_message
         assert result.state in ("RETRY", "FAILURE")
 
     def test_successful_translation_is_persisted_without_touching_the_original(self):
