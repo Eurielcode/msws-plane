@@ -123,7 +123,11 @@ function ManagerDashboardPage() {
                   <iframe
                     title={t("msws_shared_google_calendar")}
                     src={savedCalendarUrl}
-                    sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"
+                    // src is server-validated to a calendar.google.com/google.com/calendar
+                    // URL; Calendar's own embed script needs a real (non-opaque) origin to
+                    // load, so allow-same-origin is required here, not optional.
+                    // oxlint-disable-next-line react/iframe-missing-sandbox
+                    sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
                     className="h-[420px] w-full rounded-md border border-subtle"
                   />
                 ) : (
