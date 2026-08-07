@@ -36,7 +36,10 @@ function ManagerDashboardPage() {
       }
     };
     void loadDashboard();
-  }, [workspaceSlug, t]);
+    // t's identity changes on every render; this effect should only re-run when
+    // the workspace changes, not on every keystroke in the form below.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workspaceSlug]);
 
   const saveCalendar = async () => {
     if (!workspaceSlug) return;
