@@ -80,6 +80,10 @@ FROM nginx:1.31-alpine AS production
 RUN apk update && apk upgrade --no-cache && rm -rf /var/cache/apk/*
 
 COPY apps/admin/nginx/nginx.conf /etc/nginx/nginx.conf
+# The base image ships its own "Welcome to nginx!" index.html at the docroot;
+# left in place it shadows the god-mode app for "/" before try_files ever
+# reaches its fallback.
+RUN rm -rf /usr/share/nginx/html/*
 COPY --from=installer /app/apps/admin/build/client /usr/share/nginx/html/god-mode
 
 EXPOSE 3000
