@@ -14,10 +14,12 @@ import type { TNameDescriptionLoader } from "@plane/types";
 // components
 import { DescriptionVersionsRoot } from "@/components/core/description-versions";
 import { DescriptionInput } from "@/components/editor/rich-text/description-input";
+import { TranslatedContent, TranslatedText } from "@/components/msws/translated-content";
 // hooks
 import { useIssueDetail } from "@/hooks/store/use-issue-detail";
 import { useMember } from "@/hooks/store/use-member";
 import { useUser } from "@/hooks/store/user";
+import { useWorkspace } from "@/hooks/store/use-workspace";
 import useReloadConfirmations from "@/hooks/use-reload-confirmation";
 // plane web components
 import { IssueTypeSwitcher } from "@/components/issues/issue-type-switcher";
@@ -54,6 +56,7 @@ export const PeekOverviewIssueDetails = observer(function PeekOverviewIssueDetai
   } = useIssueDetail();
 
   const { getUserDetails } = useMember();
+  const { currentWorkspace } = useWorkspace();
   // reload confirmation
   const { setShowAlert } = useReloadConfirmations(isSubmitting === "submitting");
 
@@ -105,6 +108,7 @@ export const PeekOverviewIssueDetails = observer(function PeekOverviewIssueDetai
         value={issue.name}
         containerClassName="-ml-3"
       />
+      <TranslatedText translations={issue.translations} field="name" />
 
       <DescriptionInput
         issueSequenceId={issue.sequence_id}
@@ -125,6 +129,13 @@ export const PeekOverviewIssueDetails = observer(function PeekOverviewIssueDetai
         setIsSubmitting={(value) => setIsSubmitting(value)}
         projectId={issue.project_id}
         workspaceSlug={workspaceSlug}
+      />
+      <TranslatedContent
+        translations={issue.translations}
+        field="description"
+        workspaceId={currentWorkspace?.id ?? ""}
+        workspaceSlug={workspaceSlug}
+        projectId={issue.project_id}
       />
 
       <div className="flex items-center justify-between gap-2">
