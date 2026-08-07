@@ -12,7 +12,7 @@
   "msws_completed": "Completed",
   "msws_overdue": "Overdue",
   "msws_employee_progress": "Employee progress",
-  "msws_employee_summary": "{{assigned}} assigned · {{completed}} completed",
+  "msws_employee_summary": "{assigned} assigned · {completed} completed",
   "msws_shared_google_calendar": "Shared Google Calendar",
   "msws_calendar_url_placeholder": "Paste Google Calendar embed URL",
   "msws_save_calendar": "Save calendar",

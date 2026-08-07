@@ -7,6 +7,7 @@ type Translation = {
   field: string;
   target_language: string;
   translated_text: string;
+  status: string;
 };
 
 type Props = {
@@ -26,7 +27,10 @@ export function TranslatedContent({ translations, field, workspaceId, workspaceS
   const { t } = useTranslation();
   const targetLanguage = useReaderTargetLanguage();
   const translation = useMemo(
-    () => translations?.find((item) => item.field === field && item.target_language === targetLanguage),
+    () =>
+      translations?.find(
+        (item) => item.field === field && item.target_language === targetLanguage && item.status === "completed"
+      ),
     [field, targetLanguage, translations]
   );
 
@@ -54,7 +58,10 @@ export function TranslatedContent({ translations, field, workspaceId, workspaceS
 export function TranslatedText({ translations, field }: Pick<Props, "translations" | "field">) {
   const targetLanguage = useReaderTargetLanguage();
   const translation = useMemo(
-    () => translations?.find((item) => item.field === field && item.target_language === targetLanguage),
+    () =>
+      translations?.find(
+        (item) => item.field === field && item.target_language === targetLanguage && item.status === "completed"
+      ),
     [field, targetLanguage, translations]
   );
 
