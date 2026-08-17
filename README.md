@@ -1,165 +1,47 @@
-<br /><br />
+# MSWS — Multilingual Smart Work Scheduler
 
-<p align="center">
-<a href="https://plane.so">
-  <img src="https://media.docs.plane.so/logo/plane_github_readme.png" alt="Plane Logo" width="400">
-</a>
-</p>
-<p align="center"><b>Modern project management for all teams</b></p>
+MSWS is a project management tool built for teams that work across languages. It was designed around a simple, recurring problem: an employee writes a task update in their own language, and their manager — who reads and writes in a different one — has to wait for someone to translate it, or misses the context entirely.
 
-<p align="center">
-    <a href="https://plane.so/"><b>Website</b></a> •
-    <a href="https://forum.plane.so"><b>Forum</b></a> •
-    <a href="https://x.com/planepowers"><b>X</b></a> •
-    <a href="https://docs.plane.so/"><b>Documentation</b></a>
-</p>
+MSWS solves that automatically. Whatever language a task, comment, or update is written in, the person reading it sees an automatic translation into their own language, shown right below the original text — never replacing it, always alongside it.
 
-<p>
-    <a href="https://app.plane.so/#gh-light-mode-only" target="_blank">
-      <img
-        src="https://media.docs.plane.so/GitHub-readme/github-top.webp"
-        alt="Plane Screens"
-        width="100%"
-      />
-    </a>
-</p>
+It was built as a focused extension on top of [Plane](https://plane.so), an open-source project management platform, rather than from scratch. Plane already provides a solid, well-tested foundation for issue tracking, projects, and workspaces — MSWS adds the multilingual and management-visibility layer on top of it.
 
-Meet [Plane](https://plane.so/), an open-source project management tool to track issues, run ~sprints~ cycles, and manage product roadmaps without the chaos of managing the tool itself. 🧘‍♀️
+## Core features
 
-> Plane is evolving every day. Your suggestions, ideas, and reported bugs help us immensely. Do not hesitate to join in the conversation on [Forum](https://forum.plane.so) or raise a GitHub issue. We read everything and respond to most.
+**1. Automatic bidirectional translation**
+Every work item title, description, and comment is automatically translated between the languages in use on a team. The translation appears directly underneath the original text, generated in the background via the Claude API and cached so it only needs to be produced once per piece of content.
 
-## 🚀 Installation
+**2. Manager dashboard**
+A dedicated view for managers to see, at a glance: who's on the team, what's assigned to each person, how much work is completed versus overdue, and overall team progress — without digging through individual projects.
 
-Getting started with Plane is simple. Choose the setup that works best for you:
+**3. Shared calendar view**
+A shared Google Calendar can be embedded directly into the workspace, so managers can see team availability and scheduling without switching tools or requiring calendar API access.
 
-- **Plane Cloud**
-  Sign up for a free account on [Plane Cloud](https://app.plane.so)—it's the fastest way to get up and running without worrying about infrastructure.
+## How it's built
 
-- **Self-host Plane**
-  Prefer full control over your data and infrastructure? Install and run Plane on your own servers. Follow our detailed [deployment guides](https://developers.plane.so/self-hosting/overview) to get started.
+MSWS is a Django (Python) + React (TypeScript) monorepo, following the same architecture as the underlying Plane platform:
 
-| Installation methods | Docs link                                                                                                                                                                               |
-| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Docker               | [![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)](https://developers.plane.so/self-hosting/methods/docker-compose)         |
-| Kubernetes           | [![Kubernetes](https://img.shields.io/badge/kubernetes-%23326ce5.svg?style=for-the-badge&logo=kubernetes&logoColor=white)](https://developers.plane.so/self-hosting/methods/kubernetes) |
+- **`apps/api`** — Django REST API, including the translation pipeline (Celery background tasks calling the Claude API) and the manager dashboard endpoints
+- **`apps/web`** — the main React application (React Router, MobX), including the translation UI and manager dashboard page
+- **`apps/admin`** — first-run instance setup and admin console
+- **`packages/*`** — shared UI components, i18n, and type definitions used across the apps
 
-`Instance admins` can configure instance settings with [God mode](https://developers.plane.so/self-hosting/govern/instance-admin).
+Background translation jobs run through Celery, backed by Redis. Files and static assets are served from S3-compatible object storage. The whole stack is deployable as a set of containers (see the `Dockerfile.*` files in each app).
 
-## 🌟 Features
+## Getting started
 
-- **Work Items**
-  Efficiently create and manage tasks with a robust rich text editor that supports file uploads. Enhance organization and tracking by adding sub-properties and referencing related issues.
+The fastest way to run MSWS locally is with Docker Compose:
 
-- **Cycles**
-  Maintain your team’s momentum with Cycles. Track progress effortlessly using burn-down charts and other insightful tools.
+```bash
+cp .env.example .env
+cp apps/api/.env.example apps/api/.env
+docker compose up
+```
 
-- **Modules**
-  Simplify complex projects by dividing them into smaller, manageable modules.
+Once the containers are healthy, the web app is available at `http://localhost:3000`.
 
-- **Views**
-  Customize your workflow by creating filters to display only the most relevant issues. Save and share these views with ease.
-
-- **Pages**
-  Capture and organize ideas using Plane Pages, complete with AI capabilities and a rich text editor. Format text, insert images, add hyperlinks, or convert your notes into actionable items.
-
-- **Analytics**
-  Access real-time insights across all your Plane data. Visualize trends, remove blockers, and keep your projects moving forward.
-
-## 🛠️ Local development
-
-See [CONTRIBUTING](./CONTRIBUTING.md)
-
-## ⚙️ Built with
-
-[![React Router](https://img.shields.io/badge/-React%20Router-CA4245?logo=react-router&style=for-the-badge&logoColor=white)](https://reactrouter.com/)
-[![Django](https://img.shields.io/badge/Django-092E20?style=for-the-badge&logo=django&logoColor=green)](https://www.djangoproject.com/)
-[![Node JS](https://img.shields.io/badge/node.js-339933?style=for-the-badge&logo=Node.js&logoColor=white)](https://nodejs.org/en)
-
-## 📸 Screenshots
-
-  <p>
-    <a href="https://plane.so" target="_blank">
-      <img
-        src="https://media.docs.plane.so/GitHub-readme/github-work-items.webp"
-        alt="Plane Views"
-        width="100%"
-      />
-    </a>
-  </p>
-  <p>
-    <a href="https://plane.so" target="_blank">
-      <img
-        src="https://media.docs.plane.so/GitHub-readme/github-cycles.webp"
-        width="100%"
-      />
-    </a>
-  </p>
-  <p>
-    <a href="https://plane.so" target="_blank">
-      <img
-        src="https://media.docs.plane.so/GitHub-readme/github-modules.webp"
-        alt="Plane Cycles and Modules"
-        width="100%"
-      />
-    </a>
-  </p>
-  <p>
-    <a href="https://plane.so" target="_blank">
-      <img
-        src="https://media.docs.plane.so/GitHub-readme/github-views.webp"
-        alt="Plane Analytics"
-        width="100%"
-      />
-    </a>
-  </p>
-   <p>
-    <a href="https://plane.so" target="_blank">
-      <img
-        src="https://media.docs.plane.so/GitHub-readme/github-analytics.webp"
-        alt="Plane Pages"
-        width="100%"
-      />
-    </a>
-  </p>
-</p>
-
-## 📝 Documentation
-
-Explore Plane's [product documentation](https://docs.plane.so/) and [developer documentation](https://developers.plane.so/) to learn about features, setup, and usage.
-
-## ❤️ Community
-
-Join the Plane community on [GitHub Discussions](https://github.com/orgs/makeplane/discussions) and our [Forum](https://forum.plane.so). We follow a [Code of conduct](https://github.com/makeplane/plane/blob/master/CODE_OF_CONDUCT.md) in all our community channels.
-
-Feel free to ask questions, report bugs, participate in discussions, share ideas, request features, or showcase your projects. We’d love to hear from you!
-
-## 🛡️ Security
-
-If you discover a security vulnerability in Plane, please report it responsibly instead of opening a public issue. We take all legitimate reports seriously and will investigate them promptly. See [Security policy](https://github.com/makeplane/plane/blob/master/SECURITY.md) for more info.
-
-To disclose any security issues, please email us at security@plane.so.
-
-## 🤝 Contributing
-
-There are many ways you can contribute to Plane:
-
-- Report [bugs](https://github.com/makeplane/plane/issues/new?assignees=srinivaspendem%2Cpushya22&labels=%F0%9F%90%9Bbug&projects=&template=--bug-report.yaml&title=%5Bbug%5D%3A+) or submit [feature requests](https://github.com/makeplane/plane/issues/new?assignees=srinivaspendem%2Cpushya22&labels=%E2%9C%A8feature&projects=&template=--feature-request.yaml&title=%5Bfeature%5D%3A+).
-- Review the [documentation](https://docs.plane.so/) and submit [pull requests](https://github.com/makeplane/docs) to improve it—whether it's fixing typos or adding new content.
-- Talk or write about Plane or any other ecosystem integration and [let us know](https://forum.plane.so)!
-- Show your support by upvoting [popular feature requests](https://github.com/makeplane/plane/issues).
-
-Please read [CONTRIBUTING.md](https://github.com/makeplane/plane/blob/master/CONTRIBUTING.md) for details on the process for submitting pull requests to us.
-
-### Repo activity
-
-![Plane Repo Activity](https://repobeats.axiom.co/api/embed/2523c6ed2f77c082b7908c33e2ab208981d76c39.svg "Repobeats analytics image")
-
-### We couldn't have done this without you.
-
-<a href="https://github.com/makeplane/plane/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=makeplane/plane" />
-</a>
+To enable automatic translation, set `ANTHROPIC_API_KEY` in `apps/api/.env` (get one at [console.anthropic.com](https://console.anthropic.com)) — without it, translations fail gracefully and can be retried once a key is configured.
 
 ## License
 
-This project is licensed under the [GNU Affero General Public License v3.0](https://github.com/makeplane/plane/blob/master/LICENSE.txt).
+MSWS inherits Plane's license: [GNU AGPL v3.0](./LICENSE.txt).
