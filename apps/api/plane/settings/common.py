@@ -1,3 +1,5 @@
+
+
 # Copyright (c) 2023-present Plane Software, Inc. and contributors
 # SPDX-License-Identifier: AGPL-3.0-only
 # See the LICENSE file for details.
@@ -8,6 +10,7 @@
 import ipaddress
 import logging
 import os
+import socket
 from urllib.parse import urlparse
 from urllib.parse import urljoin
 
@@ -21,6 +24,19 @@ from corsheaders.defaults import default_headers
 
 # Module imports
 from plane.utils.url import is_valid_url
+
+# Some hosts (e.g. Railway) resolve outbound hostnames to an IPv6 address the
+# container has no route to, which fails outbound connections (SMTP to Gmail
+# and similar) with "[Errno 101] Network unreachable" even though IPv4 works
+# fine. Force IPv4-only DNS resolution process-wide for outbound sockets.
+_original_getaddrinfo = socket.getaddrinfo
+
+
+def _ipv4_only_getaddrinfo(host, port, family=0, type=0, proto=0, flags=0):
+    return _original_getaddrinfo(host, port, socket.AF_INET, type, proto, flags)
+
+
+socket.getaddrinfo = _ipv4_only_getaddrinfo
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
