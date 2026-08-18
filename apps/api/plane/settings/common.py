@@ -307,6 +307,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Email settings
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+# Without a timeout, a blocked/black-holed SMTP port (common on PaaS hosts)
+# hangs the sending task forever instead of failing with a visible error.
+EMAIL_TIMEOUT = int(os.environ.get("EMAIL_TIMEOUT", 15))
 
 # Storage Settings
 # Use Minio settings
