@@ -50,17 +50,15 @@ const validateFilename = (filename: string): string | null => {
 };
 
 /**
- * @description from the provided signed URL response, generate a payload to be used to upload the file
+ * @description from the provided signed URL response, generate a payload to be used to upload the file.
+ * Uploads go through a presigned PUT URL (uniformly supported across
+ * S3-compatible providers, unlike POST which e.g. Cloudflare R2 rejects),
+ * so the request body is just the raw file.
  * @param {TFileSignedURLResponse} signedURLResponse
  * @param {File} file
- * @returns {FormData} file upload request payload
+ * @returns {File} file upload request payload
  */
-export const generateFileUploadPayload = (signedURLResponse: TFileSignedURLResponse, file: File): FormData => {
-  const formData = new FormData();
-  Object.entries(signedURLResponse.upload_data.fields).forEach(([key, value]) => formData.append(key, value));
-  formData.append("file", file);
-  return formData;
-};
+export const generateFileUploadPayload = (signedURLResponse: TFileSignedURLResponse, file: File): File => file;
 
 /**
  * @description Detect MIME type from file signature using file-type library
