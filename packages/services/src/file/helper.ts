@@ -101,6 +101,13 @@ const validateAndDetectFileType = async (file: File): Promise<string> => {
     console.warn("Error detecting file type from signature:", _error);
   }
 
+  // Text-based formats (txt, csv, json, md, ...) have no magic-byte signature
+  // for detectMimeTypeFromSignature to find, so fall back to the browser's
+  // own extension-based type before giving up.
+  if (file.type) {
+    return file.type;
+  }
+
   // fallback for unknown files
   return "";
 };
