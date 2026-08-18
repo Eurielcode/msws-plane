@@ -30,6 +30,8 @@ type TIssueAttachmentsListItem = {
   issueServiceType?: TIssueServiceType;
 };
 
+const IMAGE_EXTENSIONS = new Set(["jpg", "jpeg", "png", "gif", "webp", "bmp", "tiff", "svg"]);
+
 export const IssueAttachmentsListItem = observer(function IssueAttachmentsListItem(props: TIssueAttachmentsListItem) {
   const { t } = useTranslation();
   // props
@@ -46,61 +48,109 @@ export const IssueAttachmentsListItem = observer(function IssueAttachmentsListIt
   const fileExtension = getFileExtension(attachment?.attributes.name ?? "");
   const fileIcon = getFileIcon(fileExtension, 18);
   const fileURL = getFileURL(attachment?.asset_url ?? "");
+  const isImage = IMAGE_EXTENSIONS.has(fileExtension.toLowerCase());
   // hooks
   const { isMobile } = usePlatformOS();
 
   if (!attachment) return <></>;
 
-  return (
-    <>
-      <button
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          window.open(fileURL, "_blank");
+  const deleteMenu = (
+    <CustomMenu ellipsis closeOnSelect placement="bottom-end" disabled={disabled}>
+      <CustomMenu.MenuItem
+        onClick={() => {
+          toggleDeleteAttachmentModal(attachmentId);
         }}
       >
-        <div className="group flex h-11 items-center justify-between gap-3 pr-2 pl-9 hover:bg-surface-2">
-          <div className="flex items-center gap-3 truncate text-13">
-            <div className="flex items-center gap-3">{fileIcon}</div>
+        <div className="flex items-center gap-2">
+          <TrashIcon className="h-3.5 w-3.5" strokeWidth={2} />
+          <span>{t("common.actions.delete")}</span>
+        </div>
+      </CustomMenu.MenuItem>
+    </CustomMenu>
+  );
+
+  // Feed-style inline preview for image attachments, so photos show up
+  // directly in the panel instead of requiring a click-through per file.
+  if (isImage) {
+    return (
+      <div className="group flex flex-col gap-2 py-2 pr-2 pl-9">
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            window.open(fileURL, "_blank");
+          }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={fileURL}
+            alt={`${fileName}.${fileExtension}`}
+            className="max-h-[480px] w-full rounded-md object-contain"
+          />
+        </button>
+        <div className="flex items-center justify-between gap-3 text-13">
+          <div className="flex min-w-0 items-center gap-3">
             <Tooltip tooltipContent={`${fileName}.${fileExtension}`} isMobile={isMobile}>
               <p className="truncate font-medium text-secondary">{`${fileName}.${fileExtension}`}</p>
             </Tooltip>
-            <span className="flex size-1.5 rounded-full bg-layer-1" />
+            <span className="flex size-1.5 flex-shrink-0 rounded-full bg-layer-1" />
             <span className="flex-shrink-0 text-placeholder">{convertBytesToSize(attachment.attributes.size)}</span>
           </div>
-
-          <div className="flex items-center gap-3">
+          <div className="flex flex-shrink-0 items-center gap-3">
             {attachment?.created_by && (
-              <>
-                <Tooltip
-                  isMobile={isMobile}
-                  tooltipContent={`${
-                    getUserDetails(attachment?.created_by)?.display_name ?? ""
-                  } uploaded on ${renderFormattedDate(attachment.updated_at)}`}
-                >
-                  <div className="flex items-center justify-center">
-                    <ButtonAvatars showTooltip userIds={attachment?.created_by} />
-                  </div>
-                </Tooltip>
-              </>
-            )}
-
-            <CustomMenu ellipsis closeOnSelect placement="bottom-end" disabled={disabled}>
-              <CustomMenu.MenuItem
-                onClick={() => {
-                  toggleDeleteAttachmentModal(attachmentId);
-                }}
+              <Tooltip
+                isMobile={isMobile}
+                tooltipContent={`${
+                  getUserDetails(attachment?.created_by)?.display_name ?? ""
+                } uploaded on ${renderFormattedDate(attachment.updated_at)}`}
               >
-                <div className="flex items-center gap-2">
-                  <TrashIcon className="h-3.5 w-3.5" strokeWidth={2} />
-                  <span>{t("common.actions.delete")}</span>
+                <div className="flex items-center justify-center">
+                  <ButtonAvatars showTooltip userIds={attachment?.created_by} />
                 </div>
-              </CustomMenu.MenuItem>
-            </CustomMenu>
+              </Tooltip>
+            )}
+            {deleteMenu}
           </div>
         </div>
-      </button>
-    </>
+      </div>
+    );
+  }
+
+  return (
+    <button
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        window.open(fileURL, "_blank");
+      }}
+    >
+      <div className="group flex h-11 items-center justify-between gap-3 pr-2 pl-9 hover:bg-surface-2">
+        <div className="flex items-center gap-3 truncate text-13">
+          <div className="flex items-center gap-3">{fileIcon}</div>
+          <Tooltip tooltipContent={`${fileName}.${fileExtension}`} isMobile={isMobile}>
+            <p className="truncate font-medium text-secondary">{`${fileName}.${fileExtension}`}</p>
+          </Tooltip>
+          <span className="flex size-1.5 rounded-full bg-layer-1" />
+          <span className="flex-shrink-0 text-placeholder">{convertBytesToSize(attachment.attributes.size)}</span>
+        </div>
+
+        <div className="flex items-center gap-3">
+          {attachment?.created_by && (
+            <Tooltip
+              isMobile={isMobile}
+              tooltipContent={`${
+                getUserDetails(attachment?.created_by)?.display_name ?? ""
+              } uploaded on ${renderFormattedDate(attachment.updated_at)}`}
+            >
+              <div className="flex items-center justify-center">
+                <ButtonAvatars showTooltip userIds={attachment?.created_by} />
+              </div>
+            </Tooltip>
+          )}
+
+          {deleteMenu}
+        </div>
+      </div>
+    </button>
   );
 });
