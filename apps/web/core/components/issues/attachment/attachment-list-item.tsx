@@ -31,6 +31,7 @@ type TIssueAttachmentsListItem = {
 };
 
 const IMAGE_EXTENSIONS = new Set(["jpg", "jpeg", "png", "gif", "webp", "bmp", "tiff", "svg"]);
+const VIDEO_EXTENSIONS = new Set(["mp4", "mpeg", "mpg", "ogv", "webm", "mov", "avi", "wmv"]);
 
 export const IssueAttachmentsListItem = observer(function IssueAttachmentsListItem(props: TIssueAttachmentsListItem) {
   const { t } = useTranslation();
@@ -48,7 +49,9 @@ export const IssueAttachmentsListItem = observer(function IssueAttachmentsListIt
   const fileExtension = getFileExtension(attachment?.attributes.name ?? "");
   const fileIcon = getFileIcon(fileExtension, 18);
   const fileURL = getFileURL(attachment?.asset_url ?? "");
-  const isImage = IMAGE_EXTENSIONS.has(fileExtension.toLowerCase());
+  const lowerExtension = fileExtension.toLowerCase();
+  const isImage = IMAGE_EXTENSIONS.has(lowerExtension);
+  const isVideo = VIDEO_EXTENSIONS.has(lowerExtension);
   // hooks
   const { isMobile } = usePlatformOS();
 
@@ -69,25 +72,31 @@ export const IssueAttachmentsListItem = observer(function IssueAttachmentsListIt
     </CustomMenu>
   );
 
-  // Feed-style inline preview for image attachments, so photos show up
-  // directly in the panel instead of requiring a click-through per file.
-  if (isImage) {
+  // Feed-style inline preview for image/video attachments, so photos and
+  // videos show up directly in the panel instead of requiring a click-through
+  // (and, for video, a download) per file.
+  if (isImage || isVideo) {
     return (
       <div className="group flex flex-col gap-2 py-2 pr-2 pl-9">
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            window.open(fileURL, "_blank");
-          }}
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={fileURL}
-            alt={`${fileName}.${fileExtension}`}
-            className="max-h-[480px] w-full rounded-md object-contain"
-          />
-        </button>
+        {isVideo ? (
+          // eslint-disable-next-line jsx-a11y/media-has-caption
+          <video src={fileURL} controls preload="metadata" className="max-h-[480px] w-full rounded-md" />
+        ) : (
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              window.open(fileURL, "_blank");
+            }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={fileURL}
+              alt={`${fileName}.${fileExtension}`}
+              className="max-h-[480px] w-full rounded-md object-contain"
+            />
+          </button>
+        )}
         <div className="flex items-center justify-between gap-3 text-13">
           <div className="flex min-w-0 items-center gap-3">
             <Tooltip tooltipContent={`${fileName}.${fileExtension}`} isMobile={isMobile}>
