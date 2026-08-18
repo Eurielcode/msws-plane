@@ -24,16 +24,11 @@ export type TFileSignedURLResponse = {
   asset_id: string;
   asset_url: string;
   upload_data: {
+    // Presigned PUT URL — the file body is sent directly to this URL, no
+    // extra form fields are required (kept as an empty object for backward
+    // compatibility with callers that previously read POST-policy fields).
     url: string;
-    fields: {
-      "Content-Type": string;
-      key: string;
-      "x-amz-algorithm": string;
-      "x-amz-credential": string;
-      "x-amz-date": string;
-      policy: string;
-      "x-amz-signature": string;
-    };
+    fields: Record<string, string>;
   };
 };
 
