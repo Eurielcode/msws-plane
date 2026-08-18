@@ -21,17 +21,17 @@ export class FileUploadService extends APIService {
   }
 
   /**
-   * Uploads a file to the specified signed URL
+   * Uploads a file to the specified presigned PUT URL
    * @param {string} url - The URL to upload the file to
-   * @param {FormData} data - The form data to upload
+   * @param {File} data - The file to upload
    * @returns {Promise<void>} Promise resolving to void
    * @throws {Error} If the request fails
    */
-  async uploadFile(url: string, data: FormData): Promise<void> {
+  async uploadFile(url: string, data: File): Promise<void> {
     this.cancelSource = axios.CancelToken.source();
-    return this.post(url, data, {
+    return this.put(url, data, {
       headers: {
-        "Content-Type": "multipart/form-data",
+        "Content-Type": data.type || "application/octet-stream",
       },
       cancelToken: this.cancelSource.token,
       withCredentials: false,
