@@ -40,6 +40,8 @@ type TIssueAttachmentsDetail = {
   disabled?: boolean;
 };
 
+const IMAGE_EXTENSIONS = new Set(["jpg", "jpeg", "png", "gif", "webp", "bmp", "tiff", "svg"]);
+
 export const IssueAttachmentsDetail = observer(function IssueAttachmentsDetail(props: TIssueAttachmentsDetail) {
   // props
   const { attachmentId, attachmentHelpers, disabled } = props;
@@ -53,24 +55,56 @@ export const IssueAttachmentsDetail = observer(function IssueAttachmentsDetail(p
   // derived values
   const attachment = attachmentId ? getAttachmentById(attachmentId) : undefined;
   const fileName = getFileName(attachment?.attributes.name ?? "");
-  const fileExtension = getFileExtension(attachment?.asset_url ?? "");
+  const fileExtension = getFileExtension(attachment?.attributes.name ?? "");
   const fileIcon = getFileIcon(fileExtension, 28);
   const fileURL = getFileURL(attachment?.asset_url ?? "");
+  const isImage = IMAGE_EXTENSIONS.has(fileExtension.toLowerCase());
   // hooks
   const { isMobile } = usePlatformOS();
 
   if (!attachment) return <></>;
 
+  const deleteModal = isDeleteIssueAttachmentModalOpen && (
+    <IssueAttachmentDeleteModal
+      isOpen={isDeleteIssueAttachmentModalOpen}
+      onClose={() => setIsDeleteIssueAttachmentModalOpen(false)}
+      attachmentOperations={attachmentHelpers.operations}
+      attachmentId={attachmentId}
+    />
+  );
+
+  // Feed-style inline preview for image attachments, so photos show up
+  // directly in the panel instead of requiring a click-through per file.
+  if (isImage) {
+    return (
+      <>
+        {deleteModal}
+        <div className="relative col-span-full overflow-hidden rounded-md border-[2px] border-subtle bg-surface-1">
+          <Link href={fileURL ?? ""} target="_blank" rel="noopener noreferrer">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={fileURL} alt={fileName} className="max-h-[480px] w-full object-contain" />
+          </Link>
+          <div className="flex items-center justify-between gap-2 px-3 py-2 text-11 text-secondary">
+            <Tooltip tooltipContent={fileName} isMobile={isMobile}>
+              <span className="truncate">{truncateText(`${fileName}`, 30)}</span>
+            </Tooltip>
+            <div className="flex flex-shrink-0 items-center gap-2">
+              <span>{convertBytesToSize(attachment.attributes.size)}</span>
+              {!disabled && (
+                <button type="button" onClick={() => setIsDeleteIssueAttachmentModalOpen(true)}>
+                  <CloseIcon className="h-4 w-4 text-secondary hover:text-primary" />
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
-      {isDeleteIssueAttachmentModalOpen && (
-        <IssueAttachmentDeleteModal
-          isOpen={isDeleteIssueAttachmentModalOpen}
-          onClose={() => setIsDeleteIssueAttachmentModalOpen(false)}
-          attachmentOperations={attachmentHelpers.operations}
-          attachmentId={attachmentId}
-        />
-      )}
+      {deleteModal}
       <div className="flex h-[60px] items-center justify-between gap-1 rounded-md border-[2px] border-subtle bg-surface-1 px-4 py-2 text-13">
         <Link href={fileURL ?? ""} target="_blank" rel="noopener noreferrer">
           <div className="flex items-center gap-3">
