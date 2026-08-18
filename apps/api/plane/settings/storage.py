@@ -63,40 +63,29 @@ class S3Storage(S3Boto3Storage):
             )
 
     def generate_presigned_post(self, object_name, file_type, file_size, expiration=None):
-        """Generate a presigned URL to upload an S3 object"""
+        """Generate a presigned URL to upload an S3 object.
+
+        Despite the name (kept for compatibility with existing callers, which
+        just forward the "url"/"fields" pair to the frontend), this issues a
+        presigned PUT URL rather than an S3 POST policy: Cloudflare R2's
+        S3-compatible API does not implement the POST Object operation (it
+        answers with 501 Not Implemented), while PUT Object is supported
+        uniformly across S3-compatible providers.
+        """
         if expiration is None:
             expiration = self.signed_url_expiration
-        fields = {"Content-Type": file_type}
 
-        conditions = [
-            {"bucket": self.aws_storage_bucket_name},
-            ["content-length-range", 1, file_size],
-            {"Content-Type": file_type},
-        ]
-
-        # Add condition for the object name (key)
-        if object_name.startswith("${filename}"):
-            conditions.append(["starts-with", "$key", object_name[: -len("${filename}")]])
-        else:
-            fields["key"] = object_name
-            conditions.append({"key": object_name})
-
-        # Generate the presigned POST URL
         try:
-            # Generate a presigned URL for the S3 object
-            response = self.s3_client.generate_presigned_post(
-                Bucket=self.aws_storage_bucket_name,
-                Key=object_name,
-                Fields=fields,
-                Conditions=conditions,
+            url = self.s3_client.generate_presigned_url(
+                "put_object",
+                Params={"Bucket": self.aws_storage_bucket_name, "Key": object_name},
                 ExpiresIn=expiration,
             )
-        # Handle errors
         except ClientError as e:
-            print(f"Error generating presigned POST URL: {e}")
+            print(f"Error generating presigned PUT URL: {e}")
             return None
 
-        return response
+        return {"url": url, "fields": {}}
 
     def _get_content_disposition(self, disposition, filename=None):
         """Helper method to generate Content-Disposition header value"""
