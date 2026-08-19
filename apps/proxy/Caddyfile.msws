@@ -1,0 +1,25 @@
+{
+	auto_https off
+	servers {
+		max_header_size 25MB
+		client_ip_headers X-Forwarded-For X-Real-IP
+		trusted_proxies static 0.0.0.0/0
+	}
+}
+
+# Railway terminates HTTPS at its own edge and forwards plain HTTP to this
+# container on $PORT, so Caddy here only needs to listen on that port and
+# route by path - no certificate management of its own.
+:{$PORT} {
+	request_body {
+		max_size {$FILE_SIZE_LIMIT:10MB}
+	}
+
+	reverse_proxy /api/* msws-plane.railway.internal:8000
+
+	reverse_proxy /auth/* msws-plane.railway.internal:8000
+
+	reverse_proxy /static/* msws-plane.railway.internal:8000
+
+	reverse_proxy /* ample-passion.railway.internal:3000
+}
