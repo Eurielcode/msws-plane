@@ -79,7 +79,10 @@ class OauthAdapter(Adapter):
             response.raise_for_status()
             return response.json()
         except requests.RequestException:
-            self.logger.warning("Error getting user token")
+            # response.text is the provider's own error body (e.g. Google's
+            # {"error": "invalid_grant", ...}) - safe to log, no secrets in it.
+            body = response.text if "response" in locals() else "no response"
+            self.logger.warning(f"Error getting user token: {body}")
             code = self.authentication_error_code()
             raise AuthenticationException(error_code=AUTHENTICATION_ERROR_CODES[code], error_message=str(code))
 
@@ -91,7 +94,8 @@ class OauthAdapter(Adapter):
             return response.json()
         except requests.RequestException:
             # Do not log headers here: they carry the access token
-            self.logger.warning("Error getting user response")
+            body = response.text if "response" in locals() else "no response"
+            self.logger.warning(f"Error getting user response: {body}")
             code = self.authentication_error_code()
             raise AuthenticationException(error_code=AUTHENTICATION_ERROR_CODES[code], error_message=str(code))
 
