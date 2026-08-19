@@ -80,7 +80,7 @@ export const IssueAttachmentsListItem = observer(function IssueAttachmentsListIt
   // (and, for video, a download) per file.
   if (isImage || isVideo) {
     return (
-      <div className="group flex flex-col gap-2 py-2 pr-2 pl-9">
+      <div className="group flex flex-col gap-2 py-2">
         {isLightboxOpen && (
           <div
             role="dialog"
@@ -111,18 +111,14 @@ export const IssueAttachmentsListItem = observer(function IssueAttachmentsListIt
         )}
         {isVideo ? (
           // eslint-disable-next-line jsx-a11y/media-has-caption
-          <video src={fileURL} controls preload="metadata" className="max-h-[480px] w-full rounded-md" />
+          <video src={fileURL} controls preload="metadata" className="aspect-square w-full object-cover" />
         ) : (
-          <button type="button" onClick={() => setIsLightboxOpen(true)}>
+          <button type="button" className="block w-full" onClick={() => setIsLightboxOpen(true)}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={fileURL}
-              alt={`${fileName}.${fileExtension}`}
-              className="max-h-[480px] w-full rounded-md object-contain"
-            />
+            <img src={fileURL} alt={`${fileName}.${fileExtension}`} className="aspect-square w-full object-cover" />
           </button>
         )}
-        <div className="flex items-center justify-between gap-3 text-13">
+        <div className="flex items-center justify-between gap-3 pr-2 pl-9 text-13">
           <div className="flex min-w-0 items-center gap-3">
             <Tooltip tooltipContent={`${fileName}.${fileExtension}`} isMobile={isMobile}>
               <p className="truncate font-medium text-secondary">{`${fileName}.${fileExtension}`}</p>
