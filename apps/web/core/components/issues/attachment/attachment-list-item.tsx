@@ -4,10 +4,11 @@
  * See the LICENSE file for details.
  */
 
+import { useState } from "react";
 import { observer } from "mobx-react";
 
 import { useTranslation } from "@plane/i18n";
-import { TrashIcon } from "@plane/propel/icons";
+import { CloseIcon, TrashIcon } from "@plane/propel/icons";
 import { Tooltip } from "@plane/propel/tooltip";
 import type { TIssueServiceType } from "@plane/types";
 import { EIssueServiceType } from "@plane/types";
@@ -54,6 +55,8 @@ export const IssueAttachmentsListItem = observer(function IssueAttachmentsListIt
   const isVideo = VIDEO_EXTENSIONS.has(lowerExtension);
   // hooks
   const { isMobile } = usePlatformOS();
+  // state
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
   if (!attachment) return <></>;
 
@@ -78,17 +81,39 @@ export const IssueAttachmentsListItem = observer(function IssueAttachmentsListIt
   if (isImage || isVideo) {
     return (
       <div className="group flex flex-col gap-2 py-2 pr-2 pl-9">
+        {isLightboxOpen && (
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label={`${fileName}.${fileExtension}`}
+            tabIndex={-1}
+            className="fixed inset-0 z-30 flex items-center justify-center bg-backdrop p-4"
+            onClick={() => setIsLightboxOpen(false)}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") setIsLightboxOpen(false);
+            }}
+          >
+            <button
+              type="button"
+              className="absolute top-4 right-4 flex size-9 items-center justify-center rounded-full bg-surface-1/80 text-primary"
+              aria-label={t("common.actions.close")}
+              onClick={() => setIsLightboxOpen(false)}
+            >
+              <CloseIcon className="size-5" />
+            </button>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={fileURL}
+              alt={`${fileName}.${fileExtension}`}
+              className="max-h-full max-w-full rounded-md object-contain"
+            />
+          </div>
+        )}
         {isVideo ? (
           // eslint-disable-next-line jsx-a11y/media-has-caption
           <video src={fileURL} controls preload="metadata" className="max-h-[480px] w-full rounded-md" />
         ) : (
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              window.open(fileURL, "_blank");
-            }}
-          >
+          <button type="button" onClick={() => setIsLightboxOpen(true)}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={fileURL}
