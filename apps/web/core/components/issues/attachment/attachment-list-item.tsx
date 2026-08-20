@@ -118,7 +118,7 @@ export const IssueAttachmentsListItem = observer(function IssueAttachmentsListIt
             <img src={fileURL} alt={`${fileName}.${fileExtension}`} className="aspect-square w-full object-cover" />
           </button>
         )}
-        <div className="flex items-center justify-between gap-3 pr-2 pl-9 text-13">
+        <div className="flex items-center justify-between gap-3 pr-2 pl-4 text-13 sm:pl-9">
           <div className="flex min-w-0 items-center gap-3">
             <Tooltip tooltipContent={`${fileName}.${fileExtension}`} isMobile={isMobile}>
               <p className="truncate font-medium text-secondary">{`${fileName}.${fileExtension}`}</p>
@@ -154,7 +154,7 @@ export const IssueAttachmentsListItem = observer(function IssueAttachmentsListIt
         window.open(fileURL, "_blank");
       }}
     >
-      <div className="group flex h-11 items-center justify-between gap-3 pr-2 pl-9 hover:bg-surface-2">
+      <div className="group flex h-11 items-center justify-between gap-3 pr-2 pl-4 hover:bg-surface-2 sm:pl-9">
         <div className="flex items-center gap-3 truncate text-13">
           <div className="flex items-center gap-3">{fileIcon}</div>
           <Tooltip tooltipContent={`${fileName}.${fileExtension}`} isMobile={isMobile}>
