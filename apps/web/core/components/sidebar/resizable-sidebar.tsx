@@ -7,8 +7,27 @@
 import type { Dispatch, ReactElement, SetStateAction } from "react";
 import React, { useCallback, useEffect, useState, useRef } from "react";
 // helpers
-import { usePlatformOS } from "@plane/hooks";
 import { cn } from "@plane/utils";
+
+// Below this width the sidebar must overlay content instead of pushing it,
+// regardless of user agent - a resized desktop browser or a tablet with a
+// desktop-style UA is just as width-constrained as a phone.
+const NARROW_VIEWPORT_QUERY = "(max-width: 767px)";
+
+function useIsNarrowViewport() {
+  const [isNarrow, setIsNarrow] = useState(
+    () => typeof window !== "undefined" && window.matchMedia(NARROW_VIEWPORT_QUERY).matches
+  );
+
+  useEffect(() => {
+    const mediaQueryList = window.matchMedia(NARROW_VIEWPORT_QUERY);
+    const handleChange = (e: MediaQueryListEvent) => setIsNarrow(e.matches);
+    mediaQueryList.addEventListener("change", handleChange);
+    return () => mediaQueryList.removeEventListener("change", handleChange);
+  }, []);
+
+  return isNarrow;
+}
 
 interface ResizableSidebarProps {
   showPeek?: boolean;
@@ -57,7 +76,7 @@ export function ResizableSidebar({
   const initialWidthRef = useRef<number>(0);
   const initialMouseXRef = useRef<number>(0);
   // hooks
-  const { isMobile } = usePlatformOS();
+  const isMobile = useIsNarrowViewport();
   // handlers
   const setShowPeek = useCallback(
     (value: boolean) => {
